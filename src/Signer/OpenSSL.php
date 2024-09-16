@@ -2,6 +2,7 @@
 namespace Lcobucci\JWT\Signer;
 
 use InvalidArgumentException;
+use OpenSSLAsymmetricKey;
 use function is_resource;
 use function openssl_error_string;
 use function openssl_free_key;
@@ -17,17 +18,13 @@ abstract class OpenSSL extends BaseSigner
     {
         $privateKey = $this->getPrivateKey($key->getContent(), $key->getPassphrase());
 
-        try {
-            $signature = '';
+        $signature = '';
 
-            if (! openssl_sign($payload, $signature, $privateKey, $this->getAlgorithm())) {
-                throw CannotSignPayload::errorHappened(openssl_error_string());
-            }
-
-            return $signature;
-        } finally {
-            openssl_free_key($privateKey);
+        if (!openssl_sign($payload, $signature, $privateKey, $this->getAlgorithm())) {
+            throw CannotSignPayload::errorHappened(openssl_error_string());
         }
+
+        return $signature;
     }
 
     /**
@@ -75,13 +72,13 @@ abstract class OpenSSL extends BaseSigner
     /**
      * Raises an exception when the key type is not the expected type
      *
-     * @param resource|bool $key
+     * @param OpenSSLAsymmetricKey $key
      *
      * @throws InvalidArgumentException
      */
-    private function validateKey($key)
+    private function validateKey($key): void
     {
-        if (! is_resource($key)) {
+        if ($key instanceof OpenSSLAsymmetricKey) {
             throw InvalidKeyProvided::cannotBeParsed(openssl_error_string());
         }
 
