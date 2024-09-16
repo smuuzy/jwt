@@ -3,9 +3,7 @@ namespace Lcobucci\JWT\Signer;
 
 use InvalidArgumentException;
 use OpenSSLAsymmetricKey;
-use function is_resource;
 use function openssl_error_string;
-use function openssl_free_key;
 use function openssl_pkey_get_details;
 use function openssl_pkey_get_private;
 use function openssl_pkey_get_public;
@@ -31,7 +29,7 @@ abstract class OpenSSL extends BaseSigner
      * @param string $pem
      * @param string $passphrase
      *
-     * @return resource
+     * @return OpenSSLAsymmetricKey
      */
     private function getPrivateKey($pem, $passphrase)
     {
@@ -51,7 +49,6 @@ abstract class OpenSSL extends BaseSigner
     {
         $publicKey = $this->getPublicKey($key->getContent());
         $result    = openssl_verify($payload, $expected, $publicKey, $this->getAlgorithm());
-        openssl_free_key($publicKey);
 
         return $result === 1;
     }
@@ -59,7 +56,7 @@ abstract class OpenSSL extends BaseSigner
     /**
      * @param string $pem
      *
-     * @return resource
+     * @return OpenSSLAsymmetricKey
      */
     private function getPublicKey($pem)
     {
