@@ -75,7 +75,7 @@ abstract class OpenSSL extends BaseSigner
      */
     private function validateKey($key): void
     {
-        if ($key instanceof OpenSSLAsymmetricKey) {
+        if (!($key instanceof OpenSSLAsymmetricKey)) {
             throw InvalidKeyProvided::cannotBeParsed(openssl_error_string());
         }
 
